@@ -55,7 +55,7 @@
     const resultatsDiv = document.getElementById('resultats');
 
     // 1. Chargement Automatique du CSV
-    Papa.parse("Annuaire_Teams_Trie.csv", {
+    Papa.parse("./Annuaire_Teams_Trie.csv", {
         download: true,
         header: true,
         skipEmptyLines: true,
@@ -133,4 +133,5 @@
 </script>
 
 </body>
+
 </html>
