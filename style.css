@@ -1,0 +1,94 @@
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    padding: 40px;
+    background-color: #f0f2f5;
+    display: flex;
+    justify-content: center;
+}
+
+.container {
+    width: 100%;
+    max-width: 500px;
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+h2 {
+    color: #2c3e50;
+    margin-top: 0;
+    font-size: 1.5rem;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+input {
+    width: 100%;
+    padding: 15px;
+    margin: 20px 0;
+    border: 2px solid #dfe3e8;
+    border-radius: 8px;
+    font-size: 18px;
+    outline: none;
+    transition: border 0.3s;
+}
+
+input:focus {
+    border-color: #0078d4;
+    box-shadow: 0 0 0 3px rgba(0,120,212,0.1);
+}
+
+.contact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 8px;
+    background: #f8f9fa;
+}
+
+.highlight {
+    border: 1px solid #0078d4;
+    background-color: #eef7ff;
+}
+
+.name {
+    font-weight: 600;
+    color: #333;
+}
+
+.btn-appel {
+    background: #28a745;
+    color: white;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: bold;
+}
+
+.status-msg {
+    font-size: 0.85rem;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+}
+
+.error {
+    background: #fee2e2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.hint {
+    margin-top: 20px;
+    color: #666;
+    font-size: 0.8rem;
+}
