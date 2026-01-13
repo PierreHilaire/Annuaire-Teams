@@ -4,53 +4,208 @@
     <meta charset="UTF-8">
     <title>Annuaire Teams Rapide</title>
 
-    <!-- Librairie PapaParse -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; padding: 40px; background-color: #f0f2f5; display: flex; justify-content: center; }
-        .container { width: 100%; max-width: 500px; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
-        h2 { color: #2c3e50; margin-top: 0; font-size: 1.5rem; border-bottom: 2px solid #eee; padding-bottom: 10px; }
-
-        input { 
-            width: 100%; padding: 15px; margin: 20px 0; border: 2px solid #dfe3e8; 
-            border-radius: 8px; box-sizing: border-box; font-size: 18px; outline: none; transition: border 0.3s;
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            padding: 40px;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
         }
-        input:focus { border-color: #0078d4; box-shadow: 0 0 0 3px rgba(0,120,212,0.1); }
 
-        .contact { 
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid transparent; background: #f8f9fa;
+        .container {
+            width: 100%;
+            max-width: 500px;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
-        .highlight { border-color: #0078d4; background-color: #eef7ff; }
 
-        .name { font-weight: 600; color: #333; }
-        .btn-appel { 
-            background: #28a745; color: white; text-decoration: none; 
-            padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: bold;
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
         }
-        .status-msg { font-size: 0.85rem; padding: 10px; border-radius: 5px; margin-bottom: 10px; }
-        .error { background: #fee2e2; color: #dc2626; border: 1px solid #fecaca; }
-        .success { background: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+
+        input {
+            width: 100%;
+            padding: 15px;
+            margin: 20px 0;
+            border: 2px solid #dfe3e8;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 18px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: #0078d4;
+            box-shadow: 0 0 0 3px rgba(0,120,212,0.1);
+        }
+
+        .contact {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid transparent;
+            background: #f8f9fa;
+        }
+
+        .highlight {
+            border-color: #0078d4;
+            background-color: #eef7ff;
+        }
+
+        .name {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .btn-appel {
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .status-msg {
+            font-size: 0.85rem;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .success {
+            background: #f0fdf4;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
     </style>
 </head>
+
 <body>
+    <div class="container">
+        <h2>📞 Annuaire Teams</h2>
 
-<div class="container">
-    <h2>📞 Annuaire Teams</h2>
+        <div id="status" class="status-msg">Chargement du fichier...</div>
 
-    <div id="status" class="status-msg">Chargement du fichier...</div>
+        <input type="text" id="search" placeholder="Nom ou Prénom..." autofocus>
 
-    <input type="text" id="search" placeholder="Nom ou Prénom..." autofocus>
+        <div id="resultats"></div>
 
-    <div id="resultats"></div>
+        <p style="margin-top:20px; color: #666; font-size: 0.8rem;">
+            💡 Tapez un nom et appuyez sur <strong>Entrée</strong> pour appeler.
+        </p>
+    </div>
 
-    <p style="margin-top:20px; color: #666; font-size: 0.8rem;">
-        💡 Tapez un nom et appuyez sur <strong>Entrée</strong> pour appeler.
-    </p>
-</div>
+    <script>
+        let donnees = [];
+        let resultatsFiltres = [];
 
-<!-- JS séparé -->
-<script src="script.js"></script>
+        const statusDiv = document.getElementById('status');
+        const searchInput = document.getElementById('search');
+        const resultatsDiv = document.getElementById('resultats');
+
+        // 1. Chargement Automatique du CSV
+        Papa.parse("./Annuaire_Teams_Trie.csv", {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            delimiter: "",
+
+            complete: function(results) {
+                donnees = results.data;
+                resultatsFiltres = donnees;
+
+                if (donnees.length > 0) {
+                    statusDiv.innerText = "✅ " + donnees.length + " contacts chargés.";
+                    statusDiv.className = "status-msg success";
+                    afficher(donnees.slice(0, 5));
+                } else {
+                    statusDiv.innerText = "⚠️ Fichier vide ou mal formaté.";
+                    statusDiv.className = "status-msg error";
+                }
+            },
+
+            error: function() {
+                statusDiv.innerText = "❌ Erreur : Fichier introuvable ou blocage navigateur (Utilisez Live Server).";
+                statusDiv.className = "status-msg error";
+            }
+        });
+
+        // 2. Fonction d'affichage
+        function afficher(liste) {
+            resultatsDiv.innerHTML = '';
+
+            if (liste.length === 0) {
+                resultatsDiv.innerHTML = '<p style="color:#999; text-align:center;">Aucun résultat</p>';
+                return;
+            }
+
+            liste.forEach((item, index) => {
+                const isFirst = index === 0;
+
+                const nom = item.Nom || item.NOM || "";
+                const prenom = item.Prenom || item.PRENOM || "";
+
+                const div = document.createElement('div');
+                div.className = `contact ${isFirst ? 'highlight' : ''}`;
+
+                div.innerHTML = `
+                    <span class="name">${nom} ${prenom}</span>
+                    <span class="btn-appel">Appuyer sur Entrée</span>
+                `;
+
+                resultatsDiv.appendChild(div);
+            });
+        }
+
+        // 3. Barre de recherche
+        searchInput.addEventListener('input', (e) => {
+            const val = e.target.value.toLowerCase();
+
+            resultatsFiltres = donnees.filter(d => {
+                const n = (d.Nom || "").toLowerCase();
+                const p = (d.Prenom || "").toLowerCase();
+                return n.includes(val) || p.includes(val);
+            });
+
+            afficher(resultatsFiltres.slice(0, 5));
+        });
+
+        // 4. Touche Entrée pour ouvrir le lien
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                if (resultatsFiltres.length > 0) {
+                    const lien = resultatsFiltres[0].Lien || resultatsFiltres[0].lien;
+
+                    if (lien && lien.trim() !== "") {
+                        console.log("Appel vers : " + lien);
+                        window.location.href = lien;
+                    } else {
+                        alert("Pas de lien trouvé pour ce contact dans la colonne 'Lien'.");
+                    }
+                }
+            }
+        });
+    </script>
 </body>
 </html>
