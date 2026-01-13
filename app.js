@@ -12,6 +12,7 @@ Papa.parse("./Annuaire_Teams_Trie.csv", {
     download: true,
     header: true,
     skipEmptyLines: true,
+    delimiter: ";",
 
     complete: function(results) {
         donnees = results.data;
@@ -28,38 +29,62 @@ Papa.parse("./Annuaire_Teams_Trie.csv", {
     },
 
     error: function() {
-        statusDiv.innerText = "❌ Erreur : Fichier introuvable ou blocage navigateur (Utilisez Live Server).";
+        statusDiv.innerText = "❌ Erreur de chargement du fichier CSV.";
         statusDiv.className = "status-msg error";
     }
 });
 
 /* ===============================
-   Affichage
+   Affichage des contacts
    =============================== */
 function afficher(liste) {
     resultatsDiv.innerHTML = '';
 
     if (liste.length === 0) {
-        resultatsDiv.innerHTML = '<p style="color:#999; text-align:center;">Aucun résultat</p>';
+        resultatsDiv.innerHTML = '<p style="color:#999;text-align:center;">Aucun résultat</p>';
         return;
     }
 
     liste.forEach((item, index) => {
-        const isFirst = index === 0;
-        const nom = item.Nom || item.NOM || "";
-        const prenom = item.Prenom || item.PRENOM || "";
-
         const div = document.createElement('div');
-        div.className = `contact ${isFirst ? 'highlight' : ''}`;
+        div.className = `contact ${index === 0 ? 'highlight' : ''}`;
 
         div.innerHTML = `
-            <span class="name">${nom} ${prenom}</span>
-            <span class="btn-appel">Appuyer sur Entrée</span>
+            <span class="name">${item.Nom} ${item.Prenom}</span>
+            <div class="actions">
+                <a class="btn btn-call"
+                    href="${item.LienAppel || '#'}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Appeler">
+                        <img src="img/tél.png" alt="Appeler">
+                </a>
+                <a class="btn btn-chat"
+                    href="${item.LienChat || '#'}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Message Teams">
+                    <img src="img/chat.png" alt="Message Teams">
+                </a>
+
+                <a class="btn btn-mail"
+                    href="${item.LienOutlook || '#'}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Envoyer un mail">✉️</a>
+            </div>
         `;
 
         resultatsDiv.appendChild(div);
     });
 }
+
+document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (link && link.getAttribute('href') === '#') {
+        e.preventDefault();
+    }
+});
 
 /* ===============================
    Recherche
@@ -67,26 +92,20 @@ function afficher(liste) {
 searchInput.addEventListener('input', (e) => {
     const val = e.target.value.toLowerCase();
 
-    resultatsFiltres = donnees.filter(d => {
-        const n = (d.Nom || "").toLowerCase();
-        const p = (d.Prenom || "").toLowerCase();
-        return n.includes(val) || p.includes(val);
-    });
+    resultatsFiltres = donnees.filter(d =>
+        d.Nom.toLowerCase().includes(val) ||
+        d.Prenom.toLowerCase().includes(val)
+    );
 
     afficher(resultatsFiltres.slice(0, 5));
 });
 
 /* ===============================
-   Entrée = appel Teams
+   Entrée = appel
    =============================== */
 searchInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && resultatsFiltres.length > 0) {
-        const lien = resultatsFiltres[0].Lien || resultatsFiltres[0].lien;
-
-        if (lien && lien.trim() !== "") {
-            window.location.href = lien;
-        } else {
-            alert("Pas de lien trouvé pour ce contact dans la colonne 'Lien'.");
-        }
+        const lien = resultatsFiltres[0].LienAppel;
+        if (lien) window.location.href = lien;
     }
 });
