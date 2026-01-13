@@ -5,8 +5,20 @@ const statusDiv = document.getElementById('status');
 const searchInput = document.getElementById('search');
 const resultatsDiv = document.getElementById('resultats');
 
+/* === MODAL ELEMENTS === */
+const modal = document.getElementById('modal');
+const closeModal = document.getElementById('closeModal');
+
+const modalName = document.getElementById('modalName');
+const modalSite = document.getElementById('modalSite');
+const modalCode = document.getElementById('modalCode');
+const modalEnseigne = document.getElementById('modalEnseigne');
+const modalCommune = document.getElementById('modalCommune');
+const modalSDA = document.getElementById('modalSDA');
+const modalMail = document.getElementById('modalMail');
+
 /* ===============================
-   Chargement du CSV
+   Chargement CSV
    =============================== */
 Papa.parse("./Annuaire_Teams_Trie.csv", {
     download: true,
@@ -19,77 +31,80 @@ Papa.parse("./Annuaire_Teams_Trie.csv", {
         resultatsFiltres = donnees;
 
         if (donnees.length > 0) {
-            statusDiv.innerText = "✅ " + donnees.length + " contacts chargés.";
+            statusDiv.innerText = `✅ ${donnees.length} contacts chargés.`;
             statusDiv.className = "status-msg success";
             afficher(donnees.slice(0, 5));
-        } else {
-            statusDiv.innerText = "⚠️ Fichier vide ou mal formaté.";
-            statusDiv.className = "status-msg error";
         }
-    },
-
-    error: function() {
-        statusDiv.innerText = "❌ Erreur de chargement du fichier CSV.";
-        statusDiv.className = "status-msg error";
     }
 });
 
 /* ===============================
-   Affichage des contacts
+   Affichage
    =============================== */
 function afficher(liste) {
     resultatsDiv.innerHTML = '';
-
-    if (liste.length === 0) {
-        resultatsDiv.innerHTML = '<p style="color:#999;text-align:center;">Aucun résultat</p>';
-        return;
-    }
 
     liste.forEach((item, index) => {
         const div = document.createElement('div');
         div.className = `contact ${index === 0 ? 'highlight' : ''}`;
 
         div.innerHTML = `
-            <span class="name">${item.Nom} ${item.Prenom}</span>
-            <div class="actions">
-                <a class="btn btn-call"
-                    href="${item.LienAppel || '#'}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Appeler">
-                        <img src="img/tél.png" alt="Appeler">
-                </a>
-                <a class="btn btn-chat"
-                    href="${item.LienChat || '#'}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Message Teams">
-                    <img src="img/chat.png" alt="Message Teams">
-                </a>
+            <span class="name" data-index="${donnees.indexOf(item)}">
+                ${item.Nom} ${item.Prenom}
+            </span>
 
-                <a class="btn btn-mail"
-                    href="${item.LienOutlook || '#'}"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Envoyer un mail">✉️</a>
+            <div class="actions">
+                <a class="btn btn-call" href="${item.LienAppel}" target="_blank">
+                    <img src="img/tél.png">
+                </a>
+                <a class="btn btn-chat" href="${item.LienChat}" target="_blank">
+                <img src="img/chat.png">
+                </a>
+                <a class="btn btn-mail" href="${item.LienOutlook}" target="_blank">
+                    <img src="img/mail.png">
+                </a>
             </div>
         `;
 
         resultatsDiv.appendChild(div);
     });
+
+    // clic sur nom
+    document.querySelectorAll('.name').forEach(el => {
+        el.addEventListener('click', () => {
+            const user = donnees[el.dataset.index];
+            ouvrirModal(user);
+        });
+    });
 }
 
-document.addEventListener('click', (e) => {
-    const link = e.target.closest('a');
-    if (link && link.getAttribute('href') === '#') {
-        e.preventDefault();
-    }
+/* ===============================
+   MODAL
+   =============================== */
+function ouvrirModal(user) {
+    modalName.textContent = `${user.Prenom} ${user.Nom}`;
+    modalSite.textContent = user["Nom du site"] || "";
+    modalCode.textContent = user["Code Site"] || "";
+    modalEnseigne.textContent = user.Enseigne || "";
+    modalCommune.textContent = user.Commune || "";
+    modalSDA.textContent = user.SDA || "";
+    modalMail.textContent = user.Mail || "";
+
+    modal.classList.remove('hidden');
+}
+
+closeModal.addEventListener('click', () => {
+    modal.classList.add('hidden');
+});
+
+modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.classList.add('hidden');
 });
 
 /* ===============================
    Recherche
    =============================== */
-searchInput.addEventListener('input', (e) => {
+searchInput.addEventListener('input', e => {
     const val = e.target.value.toLowerCase();
 
     resultatsFiltres = donnees.filter(d =>
@@ -98,14 +113,4 @@ searchInput.addEventListener('input', (e) => {
     );
 
     afficher(resultatsFiltres.slice(0, 5));
-});
-
-/* ===============================
-   Entrée = appel
-   =============================== */
-searchInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && resultatsFiltres.length > 0) {
-        const lien = resultatsFiltres[0].LienAppel;
-        if (lien) window.location.href = lien;
-    }
 });

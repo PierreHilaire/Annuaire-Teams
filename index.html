@@ -4,10 +4,8 @@
     <meta charset="UTF-8">
     <title>Annuaire Teams Rapide</title>
 
-    <!-- CSS -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- Librairie CSV -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
 </head>
 
@@ -26,7 +24,24 @@
         </p>
     </div>
 
-    <!-- JS -->
+    <!-- 🔽 POPUP FICHE UTILISATEUR -->
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <span id="closeModal" class="close">&times;</span>
+
+            <h3 id="modalName"></h3>
+
+            <div class="fiche">
+                <p><strong>Site :</strong> <span id="modalSite"></span></p>
+                <p><strong>Code site :</strong> <span id="modalCode"></span></p>
+                <p><strong>Enseigne :</strong> <span id="modalEnseigne"></span></p>
+                <p><strong>Commune :</strong> <span id="modalCommune"></span></p>
+                <p><strong>SDA :</strong> <span id="modalSDA"></span></p>
+                <p><strong>Email :</strong> <span id="modalMail"></span></p>
+            </div>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>
